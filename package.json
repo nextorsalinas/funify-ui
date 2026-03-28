@@ -7,8 +7,8 @@
   },
   "scripts": {
     "dev": "next dev",
-    "build": "NEXT_PUBLIC_API_URL=https://pruebas.funifay.com/backend/public next build",
-    "start": "NEXT_PUBLIC_API_URL=https://pruebas.funifay.com/backend/public next start",
+    "build": "next build",
+    "start": "next start",
     "lint": "next lint"
   },
   "dependencies": {

@@ -19,7 +19,7 @@ return [
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => ['https://dev.funifay.com', 'http://localhost:3000'],
+    'allowed_origins' => ['https://dev.funifay.com', 'https://www.dev.funifay.com', 'http://localhost:3000'],
 
     'allowed_origins_patterns' => [],
 

@@ -15,7 +15,7 @@ class MarketplaceController extends Controller
         $services = Service::with('agency')->get()->map(function($item) {
             return [
                 'id'            => 'srv_' . $item->id,
-                'name'          => $item->title,
+                'name'          => $item->name,
                 'description'   => $item->description,
                 'price'         => (float) $item->price,
                 'image_url'     => $item->image_url,
@@ -30,7 +30,7 @@ class MarketplaceController extends Controller
         $products = PhysicalProduct::with('agency')->get()->map(function($item) {
             return [
                 'id'            => 'prd_' . $item->id,
-                'name'          => $item->title,
+                'name'          => $item->name,
                 'description'   => $item->description,
                 'price'         => (float) $item->price,
                 'image_url'     => $item->image_url,

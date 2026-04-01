@@ -20,8 +20,8 @@ const nextConfig = {
       },
       {
         protocol: 'https',
-        hostname: 'dev.funifay.com',
-        pathname: '/backend/public/storage/**',
+        hostname: 'api.funifay.com',
+        pathname: '/storage/**',
       },
     ],
   },

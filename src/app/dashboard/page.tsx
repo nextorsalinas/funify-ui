@@ -19,6 +19,34 @@ import AddInventoryModal from './AddInventoryModal';
 // --- Componente Principal de la Página ---
 export default function DashboardPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [inventory, setInventory] = useState<any[]>([]);
+  const [loadingTasks, setLoadingTasks] = useState(true);
+  const [triggerRefresh, setTriggerRefresh] = useState(false);
+
+  React.useEffect(() => {
+    const fetchInventory = async () => {
+      setLoadingTasks(true);
+      try {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/dashboard/inventory`);
+        if (res.ok) {
+          const data = await res.json();
+          const formatted = data.map((item: any) => ({
+            id: item.id,
+            name: item.name || item.title,
+            type: item.type,
+            price: `$${Number(item.price).toLocaleString()} MXN`,
+            status: (item.is_active ?? true) ? 'Activo' : 'Pausado'
+          }));
+          setInventory(formatted);
+        }
+      } catch (err) {
+        console.error("Error fetching inventory", err);
+      } finally {
+        setLoadingTasks(false);
+      }
+    };
+    fetchInventory();
+  }, [triggerRefresh]);
 
   // Mock data (en el futuro vendrá de un fetch)
   const stats = [
@@ -28,17 +56,9 @@ export default function DashboardPage() {
     { name: 'Productos Activos', value: '45', change: '-3 agotados', icon: ShoppingBag, color: 'text-emerald-600', bg: 'bg-emerald-100' },
   ];
 
-  const inventory = [
-    { id: 1, name: 'Show de Magia Infantil', type: 'Servicio', price: '$2,500 MXN', status: 'Activo' },
-    { id: 2, name: 'Castillo Inflable Mini', type: 'Producto', price: '$800 MXN', status: 'Activo' },
-    { id: 3, name: 'Animadores Sorpresa', type: 'Servicio', price: '$1,200 MXN', status: 'Pausado' },
-    { id: 4, name: 'Pastel Temático 3 Pisos', type: 'Producto', price: '$1,500 MXN', status: 'Activo' },
-    { id: 5, name: 'Decoración con Globos', type: 'Servicio', price: '$900 MXN', status: 'Agotado' },
-  ];
-
   const handleRefreshData = () => {
-    console.log("Datos guardados. Aquí dispararíamos el fetch de Laravel.");
-    // setTriggerRefresh(prev => !prev);
+    console.log("Datos guardados. Actualizando la lista...");
+    setTriggerRefresh(prev => !prev);
   };
 
   return (
@@ -137,7 +157,14 @@ export default function DashboardPage() {
             </tbody>
           </table>
 
-          {inventory.length === 0 && (
+          {loadingTasks && (
+            <div className="p-12 text-center text-gray-500 font-medium flex flex-col items-center gap-2">
+              <Loader2 className="w-6 h-6 animate-spin text-[#001F5C]" />
+              <span>Cargando inventario...</span>
+            </div>
+          )}
+
+          {!loadingTasks && inventory.length === 0 && (
             <div className="p-12 text-center text-gray-400 font-medium">
               No tienes inventario registrado aún.
             </div>

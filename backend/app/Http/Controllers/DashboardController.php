@@ -42,12 +42,11 @@ class DashboardController extends Controller
 
             $service = Service::create([
                 'agency_id' => $request->agency_id,
-                'title' => $request->title,
+                'name' => $request->title,
                 'description' => $request->description,
                 'price' => $request->price,
                 'category' => $request->category,
                 'image_url' => $imageUrl,
-                'is_active' => true,
             ]);
 
             return response()->json(['message' => 'Service created successfully', 'data' => $service], 201);
@@ -76,13 +75,12 @@ class DashboardController extends Controller
 
             $product = PhysicalProduct::create([
                 'agency_id' => $request->agency_id,
-                'title' => $request->title,
+                'name' => $request->title,
                 'description' => $request->description,
                 'price' => $request->price,
                 'stock' => $request->stock,
                 'category' => $request->category,
                 'image_url' => $imageUrl,
-                'is_active' => true,
             ]);
 
             return response()->json(['message' => 'Product created successfully', 'data' => $product], 201);

@@ -8,8 +8,10 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL('/auth/login', request.url))
   }
 
-  // Si ya tienen sension abierta y van a login/register, los rebotamos al dashboard
-  if (token && request.nextUrl.pathname.startsWith('/auth')) {
+  // Si ya tienen sesion abierta y van a login/register, los rebotamos al dashboard
+  // Pero permitimos que se queden en callback o complete-profile
+  const isAuthPage = request.nextUrl.pathname === '/auth/login' || request.nextUrl.pathname === '/auth/register'
+  if (token && isAuthPage) {
     return NextResponse.redirect(new URL('/dashboard', request.url))
   }
 

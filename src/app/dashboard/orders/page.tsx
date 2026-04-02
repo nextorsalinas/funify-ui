@@ -12,7 +12,10 @@ async function fetchOrders() {
   try {
     const res = await fetch(`${apiUrl}/api/dashboard/orders`, { 
       cache: 'no-store',
-      headers: { 'Authorization': `Bearer ${token}` }
+      headers: { 
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${token}` 
+      }
     });
     if (!res.ok) return [];
     const json = await res.json();

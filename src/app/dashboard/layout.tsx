@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import { cookies } from 'next/headers';
 import LogoutButton from '@/components/auth/LogoutButton';
+import UserProfile from '@/components/dashboard/UserProfile';
 
 async function fetchPendingCount() {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
@@ -22,7 +23,10 @@ async function fetchPendingCount() {
   try {
     const res = await fetch(`${apiUrl}/api/dashboard/orders/pending-count`, { 
       cache: 'no-store',
-      headers: { 'Authorization': `Bearer ${token}` }
+      headers: { 
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${token}` 
+      }
     });
     if (!res.ok) return 0;
     const json = await res.json();
@@ -123,15 +127,7 @@ export default async function DashboardLayout({
 
         {/* User Profile & Logout at bottom */}
         <div className="p-4 border-t border-white/10 relative">
-          <div className="flex items-center mb-4 px-2">
-            <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center font-bold text-[#FFDB00] shadow-inner">
-              A
-            </div>
-            <div className="ml-3">
-              <p className="text-sm font-medium text-white line-clamp-1">Agencia Fiesta</p>
-              <p className="text-xs text-white/60 line-clamp-1">admin@fiesta.com</p>
-            </div>
-          </div>
+          <UserProfile />
           
           <LogoutButton />
         </div>

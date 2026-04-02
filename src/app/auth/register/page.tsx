@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { User, Mail, Lock, Building, ArrowRight, Loader2 } from 'lucide-react';
+import GoogleLoginButton from '@/components/auth/GoogleLoginButton';
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -104,7 +105,22 @@ export default function RegisterPage() {
             </div>
           </form>
 
-          <div className="mt-6">
+          <div className="mt-8">
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-200"></div>
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-2 bg-white text-gray-400 font-medium tracking-wide uppercase">o continuar con</span>
+              </div>
+            </div>
+
+            <div className="mt-6">
+              <GoogleLoginButton />
+            </div>
+          </div>
+
+          <div className="mt-8">
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
                 <div className="w-full border-t border-gray-200" />

@@ -86,6 +86,45 @@ class DashboardController extends Controller
         return response()->json(['message' => 'Image upload failed'], 400);
     }
 
+    public function updateService(Request $request, $id)
+    {
+        $service = Service::findOrFail($id);
+        if ($service->agency_id !== $request->user()->agency->id) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'price' => 'required|numeric',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+            'category' => 'required|string',
+        ]);
+
+        $service->name = $validated['title'];
+        $service->description = $validated['description'];
+        $service->price = $validated['price'];
+        $service->category = $validated['category'];
+
+        if ($request->hasFile('image')) {
+            $path = $request->file('image')->store('uploads/services', 'public');
+            $service->image_url = asset('storage/' . $path);
+        }
+
+        $service->save();
+        return response()->json(['message' => 'Service updated successfully', 'data' => $service]);
+    }
+
+    public function deleteService(Request $request, $id)
+    {
+        $service = Service::findOrFail($id);
+        if ($service->agency_id !== $request->user()->agency->id) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+        $service->delete();
+        return response()->json(['message' => 'Service deleted successfully']);
+    }
+
     public function storeProduct(Request $request)
     {
         Log::info('Product request:', $request->all());
@@ -117,5 +156,65 @@ class DashboardController extends Controller
         }
 
         return response()->json(['message' => 'Image upload failed'], 400);
+    }
+
+    public function updateProduct(Request $request, $id)
+    {
+        $product = PhysicalProduct::findOrFail($id);
+        if ($product->agency_id !== $request->user()->agency->id) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'price' => 'required|numeric',
+            'stock' => 'required|integer',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+            'category' => 'required|string',
+        ]);
+
+        $product->name = $validated['title'];
+        $product->description = $validated['description'];
+        $product->price = $validated['price'];
+        $product->stock = $validated['stock'];
+        $product->category = $validated['category'];
+
+        if ($request->hasFile('image')) {
+            $path = $request->file('image')->store('uploads/products', 'public');
+            $product->image_url = asset('storage/' . $path);
+        }
+
+        $product->save();
+        return response()->json(['message' => 'Product updated successfully', 'data' => $product]);
+    }
+
+    public function deleteProduct(Request $request, $id)
+    {
+        $product = PhysicalProduct::findOrFail($id);
+        if ($product->agency_id !== $request->user()->agency->id) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+        $product->delete();
+        return response()->json(['message' => 'Product deleted successfully']);
+    }
+
+    public function toggleStatus(Request $request, $id)
+    {
+        $type = $request->input('type');
+        $model = $type === 'Servicio' ? Service::findOrFail($id) : PhysicalProduct::findOrFail($id);
+
+        if ($model->agency_id !== $request->user()->agency->id) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        $model->is_active = !$model->is_active;
+        $model->save();
+
+        return response()->json([
+            'success' => true,
+            'is_active' => $model->is_active,
+            'message' => 'Estado actualizado correctamente'
+        ]);
     }
 }

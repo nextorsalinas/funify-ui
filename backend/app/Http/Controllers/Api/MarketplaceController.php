@@ -11,8 +11,8 @@ class MarketplaceController extends Controller
 {
     public function getItems()
     {
-        // Traer todos los servicios con su agencia
-        $services = Service::with('agency')->get()->map(function($item) {
+        // Traer todos los servicios activos con su agencia
+        $services = Service::where('is_active', true)->with('agency')->get()->map(function($item) {
             return [
                 'id'            => 'srv_' . $item->id,
                 'name'          => $item->name,
@@ -26,8 +26,8 @@ class MarketplaceController extends Controller
             ];
         });
 
-        // Traer todos los productos físicos con su agencia
-        $products = PhysicalProduct::with('agency')->get()->map(function($item) {
+        // Traer todos los productos físicos activos con su agencia
+        $products = PhysicalProduct::where('is_active', true)->with('agency')->get()->map(function($item) {
             return [
                 'id'            => 'prd_' . $item->id,
                 'name'          => $item->name,

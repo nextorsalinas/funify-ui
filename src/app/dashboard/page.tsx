@@ -12,7 +12,9 @@ import {
   MoreVertical,
   X,
   Upload,
-  Loader2
+  Loader2,
+  Eye,
+  EyeOff
 } from 'lucide-react';
 import AddInventoryModal from './AddInventoryModal';
 
@@ -22,8 +24,21 @@ export default function DashboardPage() {
   const [inventory, setInventory] = useState<any[]>([]);
   const [loadingTasks, setLoadingTasks] = useState(true);
   const [triggerRefresh, setTriggerRefresh] = useState(false);
+  const [agencyName, setAgencyName] = useState('Emprendedor');
+  const [selectedItem, setSelectedItem] = useState<any>(null);
 
   React.useEffect(() => {
+    // Cargar datos de la agencia localmente
+    const savedAgency = localStorage.getItem('funifay_agency');
+    if (savedAgency) {
+      try {
+        const agency = JSON.parse(savedAgency);
+        if (agency.name) setAgencyName(agency.name);
+      } catch (e) {
+        console.error("Error parsing agency from local storage", e);
+      }
+    }
+
     const fetchInventory = async () => {
       setLoadingTasks(true);
       try {
@@ -35,14 +50,19 @@ export default function DashboardPage() {
         const token = getCookie('funifay_token');
 
         const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/dashboard/inventory`, {
-          headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+          headers: {
+            'Accept': 'application/json',
+            ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+          }
         });
         if (res.ok) {
           const data = await res.json();
           const formatted = data.map((item: any) => ({
+            ...item,
             id: item.id,
             name: item.name || item.title,
             type: item.type,
+            price_raw: item.price,
             price: `$${Number(item.price).toLocaleString()} MXN`,
             status: (item.is_active ?? true) ? 'Activo' : 'Pausado'
           }));
@@ -56,6 +76,73 @@ export default function DashboardPage() {
     };
     fetchInventory();
   }, [triggerRefresh]);
+
+  const handleDelete = async (id: number, type: string) => {
+    if (!window.confirm('¿Estás seguro de que deseas eliminar este artículo? esta acción no se puede deshacer.')) return;
+
+    try {
+      const getCookie = (name: string) => {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        if (parts.length === 2) return parts.pop()?.split(';').shift();
+      };
+      const token = getCookie('funifay_token');
+      const endpoint = type === 'Servicio' ? `/api/dashboard/services/${id}` : `/api/dashboard/products/${id}`;
+
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}${endpoint}`, {
+        method: 'DELETE',
+        headers: {
+          'Accept': 'application/json',
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+        }
+      });
+
+      if (res.ok) {
+        setTriggerRefresh(prev => !prev);
+      } else {
+        alert('No se pudo eliminar el artículo');
+      }
+    } catch (err) {
+      console.error("Error deleting", err);
+    }
+  };
+
+  const handleToggleStatus = async (item: any) => {
+    try {
+      const getCookie = (name: string) => {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        if (parts.length === 2) return parts.pop()?.split(';').shift();
+      };
+      const token = getCookie('funifay_token');
+      
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/dashboard/inventory/${item.id}/toggle-status`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+        },
+        body: JSON.stringify({ type: item.type })
+      });
+
+      if (res.ok) {
+        setTriggerRefresh(prev => !prev);
+      }
+    } catch (err) {
+      console.error("Error toggling status", err);
+    }
+  };
+
+  const handleEdit = (item: any) => {
+    setSelectedItem(item);
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setSelectedItem(null);
+    setIsModalOpen(false);
+  };
 
   // Mock data (en el futuro vendrá de un fetch)
   const stats = [
@@ -76,7 +163,7 @@ export default function DashboardPage() {
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Hola, Pispifiestas 👋</h1>
+          <h1 className="text-2xl font-bold text-gray-900 capitalize">Hola, {agencyName} 👋</h1>
           <p className="text-gray-500 mt-1">Aquí tienes un resumen del desempeño de tu negocio hoy.</p>
         </div>
         <button
@@ -142,18 +229,33 @@ export default function DashboardPage() {
                     {item.price}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold ${item.status === 'Activo' ? 'bg-green-100 text-green-800' :
-                        item.status === 'Pausado' ? 'bg-orange-100 text-orange-800' : 'bg-red-100 text-red-800'
+                    <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold ${item.is_active ? 'bg-green-100 text-green-800' :
+                        'bg-orange-100 text-orange-800'
                       }`}>
-                      {item.status}
+                      {item.is_active ? 'Activo' : 'Pausado'}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <div className="flex items-center justify-end gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button className="text-gray-400 hover:text-[#001F5C] transition-colors" title="Editar">
+                      <button 
+                        onClick={() => handleToggleStatus(item)}
+                        className={`transition-colors ${item.is_active ? 'text-gray-400 hover:text-orange-500' : 'text-orange-500 hover:text-green-500'}`}
+                        title={item.is_active ? 'Pausar (Ocultar del Marketplace)' : 'Activar (Mostrar en Marketplace)'}
+                      >
+                        {item.is_active ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
+                      </button>
+                      <button 
+                        onClick={() => handleEdit(item)}
+                        className="text-gray-400 hover:text-[#001F5C] transition-colors" 
+                        title="Editar"
+                      >
                         <Pencil className="w-4 h-4" />
                       </button>
-                      <button className="text-gray-400 hover:text-red-600 transition-colors" title="Eliminar">
+                      <button 
+                        onClick={() => handleDelete(item.id, item.type)}
+                        className="text-gray-400 hover:text-red-600 transition-colors" 
+                        title="Eliminar"
+                      >
                         <Trash2 className="w-4 h-4" />
                       </button>
                       <button className="text-gray-400 hover:text-gray-700 transition-colors">
@@ -189,10 +291,11 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* Modal de Agregar Nuevo */}
+      {/* Modal de Agregar / Editar */}
       <AddInventoryModal
         isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        editItem={selectedItem}
+        onClose={closeModal}
         onSuccess={handleRefreshData}
       />
     </div>

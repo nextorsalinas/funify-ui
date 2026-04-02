@@ -9,40 +9,15 @@ import {
   LogOut,
   ClipboardList
 } from 'lucide-react';
-import { cookies } from 'next/headers';
 import LogoutButton from '@/components/auth/LogoutButton';
 import UserProfile from '@/components/dashboard/UserProfile';
+import PendingCountBadge from '@/components/dashboard/PendingCountBadge';
 
-async function fetchPendingCount() {
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
-  const cookieStore = await cookies();
-  const token = cookieStore.get('funifay_token')?.value;
-
-  if (!token) return 0;
-
-  try {
-    const res = await fetch(`${apiUrl}/api/dashboard/orders/pending-count`, { 
-      cache: 'no-store',
-      headers: { 
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${token}` 
-      }
-    });
-    if (!res.ok) return 0;
-    const json = await res.json();
-    return json.count || 0;
-  } catch (error) {
-    return 0;
-  }
-}
-
-export default async function DashboardLayout({
+export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const pendingCount = await fetchPendingCount();
-
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col md:flex-row font-sans">
       
@@ -75,11 +50,7 @@ export default async function DashboardLayout({
                 <ClipboardList className="w-5 h-5 mr-3 text-white/50 group-hover:text-white transition-colors" />
                 Mis Reservas
               </div>
-              {pendingCount > 0 && (
-                <span className="bg-[#FFDB00] text-[#001F5C] text-xs font-black px-2 py-0.5 rounded-full shadow-sm">
-                  {pendingCount}
-                </span>
-              )}
+              <PendingCountBadge />
             </Link>
           </div>
 

@@ -27,7 +27,16 @@ export default function DashboardPage() {
     const fetchInventory = async () => {
       setLoadingTasks(true);
       try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/dashboard/inventory`);
+        const getCookie = (name: string) => {
+          const value = `; ${document.cookie}`;
+          const parts = value.split(`; ${name}=`);
+          if (parts.length === 2) return parts.pop()?.split(';').shift();
+        };
+        const token = getCookie('funifay_token');
+
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/dashboard/inventory`, {
+          headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+        });
         if (res.ok) {
           const data = await res.json();
           const formatted = data.map((item: any) => ({

@@ -12,7 +12,7 @@ class DashboardController extends Controller
 {
     public function getOrders(Request $request)
     {
-        $agencyId = 1;
+        $agencyId = $request->user()->agency->id;
 
         $orders = Order::where('agency_id', $agencyId)
             ->with(['items.purchasable'])
@@ -27,7 +27,7 @@ class DashboardController extends Controller
 
     public function getPendingOrdersCount(Request $request)
     {
-        $agencyId = 1;
+        $agencyId = $request->user()->agency->id;
 
         $count = Order::where('agency_id', $agencyId)
             ->where('status', 'pending')
@@ -39,14 +39,16 @@ class DashboardController extends Controller
         ]);
     }
 
-    public function getInventory()
+    public function getInventory(Request $request)
     {
-        $services = Service::where('agency_id', 1)->get()->map(function ($item) {
+        $agencyId = $request->user()->agency->id;
+
+        $services = Service::where('agency_id', $agencyId)->get()->map(function ($item) {
             $item->type = 'Servicio';
             return $item;
         });
 
-        $products = PhysicalProduct::where('agency_id', 1)->get()->map(function ($item) {
+        $products = PhysicalProduct::where('agency_id', $agencyId)->get()->map(function ($item) {
             $item->type = 'Producto';
             return $item;
         });
@@ -63,7 +65,6 @@ class DashboardController extends Controller
             'price' => 'required|numeric',
             'image' => 'required|image|mimes:jpeg,png,jpg,webp|max:2048',
             'category' => 'required|string',
-            'agency_id' => 'required'
         ]);
 
         if ($request->hasFile('image')) {
@@ -71,7 +72,7 @@ class DashboardController extends Controller
             $imageUrl = asset('storage/' . $path);
 
             $service = Service::create([
-                'agency_id' => $request->agency_id,
+                'agency_id' => $request->user()->agency->id,
                 'name' => $request->title,
                 'description' => $request->description,
                 'price' => $request->price,
@@ -96,7 +97,6 @@ class DashboardController extends Controller
             'stock' => 'required|integer',
             'image' => 'required|image|mimes:jpeg,png,jpg,webp|max:2048',
             'category' => 'required|string',
-            'agency_id' => 'required'
         ]);
 
         if ($request->hasFile('image')) {
@@ -104,7 +104,7 @@ class DashboardController extends Controller
             $imageUrl = asset('storage/' . $path);
 
             $product = PhysicalProduct::create([
-                'agency_id' => $request->agency_id,
+                'agency_id' => $request->user()->agency->id,
                 'name' => $request->title,
                 'description' => $request->description,
                 'price' => $request->price,

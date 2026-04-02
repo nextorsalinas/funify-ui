@@ -9,11 +9,21 @@ import {
   LogOut,
   ClipboardList
 } from 'lucide-react';
+import { cookies } from 'next/headers';
+import LogoutButton from '@/components/auth/LogoutButton';
 
 async function fetchPendingCount() {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
+  const cookieStore = await cookies();
+  const token = cookieStore.get('funifay_token')?.value;
+
+  if (!token) return 0;
+
   try {
-    const res = await fetch(`${apiUrl}/api/dashboard/orders/pending-count`, { cache: 'no-store' });
+    const res = await fetch(`${apiUrl}/api/dashboard/orders/pending-count`, { 
+      cache: 'no-store',
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
     if (!res.ok) return 0;
     const json = await res.json();
     return json.count || 0;
@@ -123,10 +133,7 @@ export default async function DashboardLayout({
             </div>
           </div>
           
-          <button className="w-full flex items-center justify-center px-4 py-2 text-sm text-[#FFDB00] bg-white/5 hover:bg-white/10 hover:text-white transition-colors rounded-lg font-medium border border-white/10">
-            <LogOut className="w-4 h-4 mr-2" />
-            Cerrar Sesión
-          </button>
+          <LogoutButton />
         </div>
       </aside>
 

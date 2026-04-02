@@ -1,10 +1,19 @@
 import React from 'react';
 import { Calendar, MapPin, User, Mail, Phone, Clock, FileText } from 'lucide-react';
+import { cookies } from 'next/headers';
 
 async function fetchOrders() {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
+  const cookieStore = await cookies();
+  const token = cookieStore.get('funifay_token')?.value;
+
+  if (!token) return [];
+
   try {
-    const res = await fetch(`${apiUrl}/api/dashboard/orders`, { cache: 'no-store' });
+    const res = await fetch(`${apiUrl}/api/dashboard/orders`, { 
+      cache: 'no-store',
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
     if (!res.ok) return [];
     const json = await res.json();
     return json.data || [];

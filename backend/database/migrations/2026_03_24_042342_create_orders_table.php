@@ -13,6 +13,15 @@ return new class extends Migration
     {
         Schema::create('orders', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('agency_id')->constrained()->onDelete('cascade');
+            $table->string('client_name');
+            $table->string('client_email');
+            $table->string('client_phone');
+            $table->dateTime('event_date')->nullable();
+            $table->text('event_location')->nullable();
+            $table->string('status')->default('pending'); // pending, confirmed, rejected, completed
+            $table->decimal('total_amount', 10, 2)->default(0);
+            $table->text('client_notes')->nullable();
             $table->timestamps();
         });
     }

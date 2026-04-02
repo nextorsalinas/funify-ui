@@ -16,3 +16,6 @@ Route::get('/marketplace/items', [MarketplaceController::class, 'getItems']);
 Route::get('/dashboard/inventory', [DashboardController::class, 'getInventory']);
 Route::post('/dashboard/services', [DashboardController::class, 'storeService']);
 Route::post('/dashboard/products', [DashboardController::class, 'storeProduct']);
+
+// Public Checkout
+Route::post('/checkout', [\App\Http\Controllers\Api\CheckoutController::class, 'store']);

@@ -5,10 +5,26 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Service;
 use App\Models\PhysicalProduct;
+use App\Models\Order;
 use Illuminate\Support\Facades\Log;
 
 class DashboardController extends Controller
 {
+    public function getOrders(Request $request)
+    {
+        $agencyId = 1;
+
+        $orders = Order::where('agency_id', $agencyId)
+            ->with(['items.purchasable'])
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return response()->json([
+            'success' => true,
+            'data' => $orders
+        ]);
+    }
+
     public function getInventory()
     {
         $services = Service::where('agency_id', 1)->get()->map(function ($item) {

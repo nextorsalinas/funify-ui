@@ -6,7 +6,8 @@ import {
   ShoppingBag, 
   BarChart3, 
   Settings, 
-  LogOut
+  LogOut,
+  ClipboardList
 } from 'lucide-react';
 
 export default function DashboardLayout({
@@ -36,6 +37,14 @@ export default function DashboardLayout({
             >
               <LayoutDashboard className="w-5 h-5 mr-3 text-[#FFDB00]" />
               Resumen
+            </Link>
+
+            <Link 
+              href="/dashboard/orders" 
+              className="flex items-center px-3 py-2.5 text-white/80 rounded-lg hover:bg-white/10 hover:text-white transition-colors group font-medium mt-1"
+            >
+              <ClipboardList className="w-5 h-5 mr-3 text-white/50 group-hover:text-white transition-colors" />
+              Mis Reservas
             </Link>
           </div>
 

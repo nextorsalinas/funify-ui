@@ -13,6 +13,7 @@ Route::get('/user', function (Request $request) {
 Route::get('/marketplace/items', [MarketplaceController::class, 'getItems']);
 
 // Dashboard Routes
+Route::get('/dashboard/orders', [DashboardController::class, 'getOrders']);
 Route::get('/dashboard/inventory', [DashboardController::class, 'getInventory']);
 Route::post('/dashboard/services', [DashboardController::class, 'storeService']);
 Route::post('/dashboard/products', [DashboardController::class, 'storeProduct']);

@@ -10,11 +10,25 @@ import {
   ClipboardList
 } from 'lucide-react';
 
-export default function DashboardLayout({
+async function fetchPendingCount() {
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
+  try {
+    const res = await fetch(`${apiUrl}/api/dashboard/orders/pending-count`, { cache: 'no-store' });
+    if (!res.ok) return 0;
+    const json = await res.json();
+    return json.count || 0;
+  } catch (error) {
+    return 0;
+  }
+}
+
+export default async function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const pendingCount = await fetchPendingCount();
+
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col md:flex-row font-sans">
       
@@ -41,10 +55,17 @@ export default function DashboardLayout({
 
             <Link 
               href="/dashboard/orders" 
-              className="flex items-center px-3 py-2.5 text-white/80 rounded-lg hover:bg-white/10 hover:text-white transition-colors group font-medium mt-1"
+              className="flex items-center justify-between px-3 py-2.5 text-white/80 rounded-lg hover:bg-white/10 hover:text-white transition-colors group font-medium mt-1"
             >
-              <ClipboardList className="w-5 h-5 mr-3 text-white/50 group-hover:text-white transition-colors" />
-              Mis Reservas
+              <div className="flex items-center">
+                <ClipboardList className="w-5 h-5 mr-3 text-white/50 group-hover:text-white transition-colors" />
+                Mis Reservas
+              </div>
+              {pendingCount > 0 && (
+                <span className="bg-[#FFDB00] text-[#001F5C] text-xs font-black px-2 py-0.5 rounded-full shadow-sm">
+                  {pendingCount}
+                </span>
+              )}
             </Link>
           </div>
 

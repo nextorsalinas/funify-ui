@@ -25,6 +25,20 @@ class DashboardController extends Controller
         ]);
     }
 
+    public function getPendingOrdersCount(Request $request)
+    {
+        $agencyId = 1;
+
+        $count = Order::where('agency_id', $agencyId)
+            ->where('status', 'pending')
+            ->count();
+
+        return response()->json([
+            'success' => true,
+            'count' => $count
+        ]);
+    }
+
     public function getInventory()
     {
         $services = Service::where('agency_id', 1)->get()->map(function ($item) {

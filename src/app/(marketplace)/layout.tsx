@@ -1,5 +1,6 @@
 import React from "react";
 import Header from "@/components/layout/Header";
+import TopAnnouncement from "@/components/marketplace/TopAnnouncement";
 
 export default function MarketplaceLayout({
   children,
@@ -7,9 +8,12 @@ export default function MarketplaceLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="pt-[64px] md:pt-[116px]">
+    <div className="flex flex-col min-h-screen">
+      <TopAnnouncement />
       <Header />
-      {children}
+      <div className="flex-grow pt-[64px] md:pt-0">
+        {children}
+      </div>
     </div>
   );
 }

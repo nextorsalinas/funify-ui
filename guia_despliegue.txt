@@ -1,0 +1,55 @@
+=================================================================
+          GUÍA DE DESPLIEGUE MAESTRO - FUNIFAY MARKETPLACE
+=================================================================
+
+Esta guía contiene los pasos exactos para actualizar tu sitio en 
+Hostinger sin romper nada. ✨🏗️🦾
+
+-----------------------------------------------------------------
+🎨 1. DESPLIEGUE DEL FRONTEND (dev.funifay.com)
+-----------------------------------------------------------------
+
+1. Abre tu terminal local en la carpeta raíz (donde está Next.js).
+2. Ejecuta:
+   npm run build
+
+3. Sube el contenido de la carpeta de construcción (.next) a la 
+   carpeta public_html/ de dev.funifay.com en Hostinger.
+
+4. Importante: Si cambias IPs o dominios, actualiza el archivo 
+   .env.production antes de hacer el build.
+
+-----------------------------------------------------------------
+⚙️ 2. DESPLIEGUE DEL BACKEND (api.funifay.com)
+-----------------------------------------------------------------
+
+1. Sube los archivos .php modificados a:
+   domains/api.funifay.com/public_html/backend/
+
+2. ¡NUNCA SUBAS LA CARPETA 'VENDOR'! 🕵️‍♂️✨🏗️🦾
+
+3. Entra por SSH (PowerShell) y ejecuta estos comandos:
+   cd domains/api.funifay.com/public_html/backend/
+
+   # Limpieza de memoria (Obligatorio tras cada cambio)
+   php artisan config:clear
+   php artisan route:clear
+
+   # Solo si has añadido tablas o columnas nuevas
+   php artisan migrate
+
+   # Solo si has añadido librerías nuevas en composer.json
+   composer install --no-dev --ignore-platform-reqs
+
+4. Si el servidor se bloquea con error de PHP 8.4:
+   rm vendor/composer/platform_check.php
+
+-----------------------------------------------------------------
+💡 CONSEJOS PRO
+-----------------------------------------------------------------
+- Usa una Ventana de Incógnito para probar cambios de Login.
+- Siempre haz 'php artisan config:clear' después de editar el .env.
+- Los logs de errores están en: backend/storage/logs/laravel.log
+
+¡A darle gas al negocio, Néstor! 🦾🚀🏗️🥣🥂🥣🥂🥣
+=================================================================

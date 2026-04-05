@@ -12,7 +12,11 @@ class DashboardController extends Controller
 {
     public function getOrders(Request $request)
     {
-        $agencyId = $request->user()->agency->id;
+        $user = $request->user();
+        if (!$user->agency) {
+            return response()->json(['success' => false, 'message' => 'Agencia no encontrada'], 404);
+        }
+        $agencyId = $user->agency->id;
 
         $orders = Order::where('agency_id', $agencyId)
             ->with(['items.purchasable'])
@@ -27,7 +31,11 @@ class DashboardController extends Controller
 
     public function getPendingOrdersCount(Request $request)
     {
-        $agencyId = $request->user()->agency->id;
+        $user = $request->user();
+        if (!$user->agency) {
+            return response()->json(['success' => true, 'count' => 0]); 
+        }
+        $agencyId = $user->agency->id;
 
         $count = Order::where('agency_id', $agencyId)
             ->where('status', 'pending')
@@ -41,7 +49,11 @@ class DashboardController extends Controller
 
     public function getInventory(Request $request)
     {
-        $agencyId = $request->user()->agency->id;
+        $user = $request->user();
+        if (!$user->agency) {
+            return response()->json([]);
+        }
+        $agencyId = $user->agency->id;
 
         $services = Service::where('agency_id', $agencyId)->get()->map(function ($item) {
             $item->type = 'Servicio';
@@ -59,6 +71,12 @@ class DashboardController extends Controller
     public function storeService(Request $request)
     {
         Log::info('Recibida petición de servicio:', $request->all());
+        
+        $user = $request->user();
+        if (!$user->agency) {
+            return response()->json(['message' => 'No tienes una agencia configurada'], 404);
+        }
+
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
@@ -72,7 +90,7 @@ class DashboardController extends Controller
             $imageUrl = asset('storage/' . $path);
 
             $service = Service::create([
-                'agency_id' => $request->user()->agency->id,
+                'agency_id' => $user->agency->id,
                 'name' => $request->title,
                 'description' => $request->description,
                 'price' => $request->price,
@@ -88,8 +106,13 @@ class DashboardController extends Controller
 
     public function updateService(Request $request, $id)
     {
+        $user = $request->user();
+        if (!$user->agency) {
+            return response()->json(['message' => 'No autorizado'], 403);
+        }
+
         $service = Service::findOrFail($id);
-        if ($service->agency_id !== $request->user()->agency->id) {
+        if ($service->agency_id !== $user->agency->id) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
@@ -117,8 +140,13 @@ class DashboardController extends Controller
 
     public function deleteService(Request $request, $id)
     {
+        $user = $request->user();
+        if (!$user->agency) {
+            return response()->json(['message' => 'No autorizado'], 403);
+        }
+
         $service = Service::findOrFail($id);
-        if ($service->agency_id !== $request->user()->agency->id) {
+        if ($service->agency_id !== $user->agency->id) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
         $service->delete();
@@ -128,6 +156,11 @@ class DashboardController extends Controller
     public function storeProduct(Request $request)
     {
         Log::info('Product request:', $request->all());
+
+        $user = $request->user();
+        if (!$user->agency) {
+            return response()->json(['message' => 'No tienes una agencia configurada'], 404);
+        }
 
         $request->validate([
             'title' => 'required|string|max:255',
@@ -143,7 +176,7 @@ class DashboardController extends Controller
             $imageUrl = asset('storage/' . $path);
 
             $product = PhysicalProduct::create([
-                'agency_id' => $request->user()->agency->id,
+                'agency_id' => $user->agency->id,
                 'name' => $request->title,
                 'description' => $request->description,
                 'price' => $request->price,
@@ -160,8 +193,13 @@ class DashboardController extends Controller
 
     public function updateProduct(Request $request, $id)
     {
+        $user = $request->user();
+        if (!$user->agency) {
+            return response()->json(['message' => 'No autorizado'], 403);
+        }
+
         $product = PhysicalProduct::findOrFail($id);
-        if ($product->agency_id !== $request->user()->agency->id) {
+        if ($product->agency_id !== $user->agency->id) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
@@ -191,8 +229,13 @@ class DashboardController extends Controller
 
     public function deleteProduct(Request $request, $id)
     {
+        $user = $request->user();
+        if (!$user->agency) {
+            return response()->json(['message' => 'No autorizado'], 403);
+        }
+
         $product = PhysicalProduct::findOrFail($id);
-        if ($product->agency_id !== $request->user()->agency->id) {
+        if ($product->agency_id !== $user->agency->id) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
         $product->delete();
@@ -201,10 +244,15 @@ class DashboardController extends Controller
 
     public function toggleStatus(Request $request, $id)
     {
+        $user = $request->user();
+        if (!$user->agency) {
+            return response()->json(['message' => 'No autorizado'], 403);
+        }
+
         $type = $request->input('type');
         $model = $type === 'Servicio' ? Service::findOrFail($id) : PhysicalProduct::findOrFail($id);
 
-        if ($model->agency_id !== $request->user()->agency->id) {
+        if ($model->agency_id !== $user->agency->id) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 

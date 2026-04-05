@@ -46,6 +46,19 @@ export default function AddInventoryModal({ isOpen, onClose, onSuccess, editItem
     };
     const token = getCookie('funifay_token');
 
+    // Recuperar el ID de la agencia desde el localStorage
+    const agencyData = localStorage.getItem('funifay_agency');
+    if (agencyData) {
+      try {
+        const agency = JSON.parse(agencyData);
+        if (agency.id) {
+          formData.append('agency_id', agency.id);
+        }
+      } catch (e) {
+        console.error("Error parsing agency from storage", e);
+      }
+    }
+
     let endpoint = type === 'Servicio' ? '/api/dashboard/services' : '/api/dashboard/products';
     if (editItem) {
         endpoint += `/${editItem.id}`;

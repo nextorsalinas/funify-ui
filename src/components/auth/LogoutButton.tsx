@@ -7,14 +7,17 @@ export default function LogoutButton() {
   const router = useRouter();
 
   const handleLogout = () => {
-    // Borrar la cookie y el localStorage
+    // Borrar la cookie para el dominio actual y el dominio base
+    document.cookie = 'funifay_token=; Max-Age=0; path=/; domain=' + window.location.hostname;
     document.cookie = 'funifay_token=; Max-Age=0; path=/';
+    
+    // Limpiar localStorage
+    localStorage.removeItem('funifay_token');
     localStorage.removeItem('funifay_user');
     localStorage.removeItem('funifay_agency');
     
-    // Forzar la redirección
-    router.push('/auth/login');
-    router.refresh();
+    // Redirigir al login
+    window.location.href = '/auth/login';
   };
 
   return (

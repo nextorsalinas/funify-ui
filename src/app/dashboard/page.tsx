@@ -48,13 +48,27 @@ export default function DashboardPage() {
           if (parts.length === 2) return parts.pop()?.split(';').shift();
         };
         const token = getCookie('funifay_token');
+        
+        // Validación extra de token
+        if (!token || token === 'undefined' || token === 'null') {
+          window.location.href = '/auth/login';
+          return;
+        }
 
         const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/dashboard/inventory`, {
           headers: {
             'Accept': 'application/json',
-            ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+            'Authorization': `Bearer ${token}`
           }
         });
+
+        if (res.status === 401) {
+          // Token inválido o expirado en el servidor -> Logout forzado
+          document.cookie = 'funifay_token=; Max-Age=0; path=/';
+          window.location.href = '/auth/login';
+          return;
+        }
+
         if (res.ok) {
           const data = await res.json();
           const formatted = data.map((item: any) => ({

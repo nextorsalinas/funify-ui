@@ -89,6 +89,7 @@ export default function DashboardPage() {
       }
     };
     fetchInventory();
+    console.log("🛡️ DASHBOARD VERSION: 2.0 - Capa de Seguridad Activa");
   }, [triggerRefresh]);
 
   const handleDelete = async (id: number, type: string) => {
